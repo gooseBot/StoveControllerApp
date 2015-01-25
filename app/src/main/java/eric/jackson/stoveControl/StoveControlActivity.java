@@ -9,6 +9,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -23,25 +26,36 @@ import android.widget.ToggleButton;
 
 public class StoveControlActivity extends Activity {
 	/** Called when the activity is first created. */
+    ToggleButton togglebutton;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		ToggleButton togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
-		togglebutton.setChecked(getStoveState());
-	}
+    @Override
+    public void onStart() {
+        super.onStart();
+        togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
+        togglebutton.setChecked(getStoveState());
+        Log.i("[MESSAGE]", "OnStart");
+    }
+
+//	@Override
+//	protected void onResume() {
+//		super.onResume();
+//		ToggleButton togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
+//		togglebutton.setChecked(getStoveState());
+//	}
 
 	// This method is called at button click because we assigned the name to the
 	// "On Click property" of the button
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
 		case R.id.toggleButton1:
-			ToggleButton togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
+            //togglebutton.setVisibility(View.VISIBLE);
+			//togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
 			// Perform action on clicks
 			if (togglebutton.isChecked()) {
 				postData(true);
@@ -54,8 +68,13 @@ public class StoveControlActivity extends Activity {
 	private void postData(boolean stoveState) {
 		// Create a new HttpClient and Post Header
 		InputStream content = null;
+        //togglebutton.setVisibility(View.VISIBLE);
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
+            HttpParams httpParameters = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParameters, 6000);
+            HttpConnectionParams.setSoTimeout(httpParameters, 6000);
+            HttpClient httpclient = new DefaultHttpClient(httpParameters);
+
 			if (stoveState == true) {
 				HttpResponse response = httpclient
 						.execute(new HttpGet(
@@ -74,7 +93,10 @@ public class StoveControlActivity extends Activity {
 			String responseText = inputStreamToString(content).toString();
 			displayResponse(responseText);
 		} catch (Exception e) {
-			Log.e("[GET REQUEST]", "Network exception", e);
+            displayResponse("Network Timeout");
+            Toast.makeText(StoveControlActivity.this, "Network Timeout",
+                    Toast.LENGTH_SHORT).show();
+            togglebutton.setChecked(false);
 		}
 	}
 
@@ -100,8 +122,14 @@ public class StoveControlActivity extends Activity {
 	private boolean getStoveState() {
 		InputStream content = null;
 		boolean stoveOn = false;
+        //togglebutton.setVisibility(View.VISIBLE);
+
 		try {
-			HttpClient httpclient = new DefaultHttpClient();
+            HttpParams httpParameters = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParameters, 6000);
+            HttpConnectionParams.setSoTimeout(httpParameters, 6000);
+
+			HttpClient httpclient = new DefaultHttpClient(httpParameters);
 			HttpResponse response = httpclient.execute(new HttpGet(
 					"http://crazycats.linksysnet.com/"));
 			content = response.getEntity().getContent();
@@ -117,8 +145,11 @@ public class StoveControlActivity extends Activity {
 			String servo = XMLfunctions.getValue(e, "servo");
 
 		} catch (Exception e) {
-			Log.e("[GET REQUEST]", "Network exception", e);
-		}
+            displayResponse("Network Timeout");
+            Toast.makeText(StoveControlActivity.this, "Network Timeout",
+                    Toast.LENGTH_SHORT).show();
+            stoveOn=false;
+        }
 		return stoveOn;
 	}
 
