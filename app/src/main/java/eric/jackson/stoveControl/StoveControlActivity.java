@@ -27,6 +27,7 @@ import android.widget.ToggleButton;
 public class StoveControlActivity extends Activity {
 	/** Called when the activity is first created. */
     ToggleButton togglebutton;
+    String urlBase ="http://crazycats.ddns.net:8080/";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,20 +43,12 @@ public class StoveControlActivity extends Activity {
         Log.i("[MESSAGE]", "OnStart");
     }
 
-//	@Override
-//	protected void onResume() {
-//		super.onResume();
-//		ToggleButton togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
-//		togglebutton.setChecked(getStoveState());
-//	}
 
 	// This method is called at button click because we assigned the name to the
 	// "On Click property" of the button
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
 		case R.id.toggleButton1:
-            //togglebutton.setVisibility(View.VISIBLE);
-			//togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
 			// Perform action on clicks
 			if (togglebutton.isChecked()) {
 				postData(true);
@@ -68,7 +61,6 @@ public class StoveControlActivity extends Activity {
 	private void postData(boolean stoveState) {
 		// Create a new HttpClient and Post Header
 		InputStream content = null;
-        //togglebutton.setVisibility(View.VISIBLE);
 		try {
             HttpParams httpParameters = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(httpParameters, 6000);
@@ -78,14 +70,14 @@ public class StoveControlActivity extends Activity {
 			if (stoveState == true) {
 				HttpResponse response = httpclient
 						.execute(new HttpGet(
-								"http://crazycats.linksysnet.com/?stove=on&pword=jebg"));
+                                urlBase+"?stove=on&pword=jebg"));
 				content = response.getEntity().getContent();
 				Toast.makeText(StoveControlActivity.this, "Stove On",
 						Toast.LENGTH_SHORT).show();
 			} else {
 				HttpResponse response = httpclient
 						.execute(new HttpGet(
-								"http://crazycats.linksysnet.com/?stove=off&pword=jebg"));
+                                urlBase+"?stove=off&pword=jebg"));
 				content = response.getEntity().getContent();
 				Toast.makeText(StoveControlActivity.this, "Stove Off",
 						Toast.LENGTH_SHORT).show();
@@ -122,7 +114,6 @@ public class StoveControlActivity extends Activity {
 	private boolean getStoveState() {
 		InputStream content = null;
 		boolean stoveOn = false;
-        //togglebutton.setVisibility(View.VISIBLE);
 
 		try {
             HttpParams httpParameters = new BasicHttpParams();
@@ -130,8 +121,7 @@ public class StoveControlActivity extends Activity {
             HttpConnectionParams.setSoTimeout(httpParameters, 6000);
 
 			HttpClient httpclient = new DefaultHttpClient(httpParameters);
-			HttpResponse response = httpclient.execute(new HttpGet(
-					"http://crazycats.linksysnet.com/"));
+			HttpResponse response = httpclient.execute(new HttpGet(urlBase));
 			content = response.getEntity().getContent();
 			String responseText = inputStreamToString(content).toString();
 			displayResponse(responseText);
