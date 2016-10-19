@@ -27,7 +27,7 @@ import android.widget.ToggleButton;
 public class StoveControlActivity extends Activity {
 	/** Called when the activity is first created. */
     ToggleButton togglebutton;
-    String urlBase ="http://crazycats.ddns.net:8080/";
+    String urlBase ="http://graycat.ddns.net:8080/";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
