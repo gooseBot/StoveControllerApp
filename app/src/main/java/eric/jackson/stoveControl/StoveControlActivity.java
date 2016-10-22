@@ -12,16 +12,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class StoveControlActivity extends Activity {
@@ -70,24 +66,18 @@ public class StoveControlActivity extends Activity {
 			if (stoveState == true) {
 				HttpResponse response = httpclient
 						.execute(new HttpGet(
-                                urlBase+"?stove=on&pword=jebg"));
+                                urlBase+"/stove/1"));
 				content = response.getEntity().getContent();
-				Toast.makeText(StoveControlActivity.this, "Stove On",
-						Toast.LENGTH_SHORT).show();
 			} else {
 				HttpResponse response = httpclient
 						.execute(new HttpGet(
-                                urlBase+"?stove=off&pword=jebg"));
+                                urlBase+"/stove/0"));
 				content = response.getEntity().getContent();
-				Toast.makeText(StoveControlActivity.this, "Stove Off",
-						Toast.LENGTH_SHORT).show();
 			}
 			String responseText = inputStreamToString(content).toString();
 			displayResponse(responseText);
 		} catch (Exception e) {
             displayResponse("Network Timeout");
-            Toast.makeText(StoveControlActivity.this, "Network Timeout",
-                    Toast.LENGTH_SHORT).show();
             togglebutton.setChecked(false);
 		}
 	}
@@ -121,23 +111,14 @@ public class StoveControlActivity extends Activity {
             HttpConnectionParams.setSoTimeout(httpParameters, 6000);
 
 			HttpClient httpclient = new DefaultHttpClient(httpParameters);
-			HttpResponse response = httpclient.execute(new HttpGet(urlBase));
+			HttpResponse response = httpclient.execute(new HttpGet(urlBase+"/stove/status"));
 			content = response.getEntity().getContent();
 			String responseText = inputStreamToString(content).toString();
 			displayResponse(responseText);
-			stoveOn = responseText.contains("<state>on</state>");
-
-			Document doc = XMLfunctions.XMLfromString(responseText);
-			NodeList nodes = doc.getElementsByTagName("status");
-			Element e = (Element) nodes.item(0);
-			String state = XMLfunctions.getValue(e, "state");
-			String pot = XMLfunctions.getValue(e, "pot");
-			String servo = XMLfunctions.getValue(e, "servo");
+			stoveOn = responseText.contains("on");
 
 		} catch (Exception e) {
             displayResponse("Network Timeout");
-            Toast.makeText(StoveControlActivity.this, "Network Timeout",
-                    Toast.LENGTH_SHORT).show();
             stoveOn=false;
         }
 		return stoveOn;
