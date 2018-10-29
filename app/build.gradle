@@ -1,17 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 8
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "eric.jackson.stoveControl"
-        minSdkVersion 8
-        targetSdkVersion 8
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_5
-            targetCompatibility JavaVersion.VERSION_1_5
-        }
+        minSdkVersion 24
+        targetSdkVersion 28
+
     }
 
     buildTypes {
@@ -20,4 +17,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+}
+
+dependencies{
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
 }

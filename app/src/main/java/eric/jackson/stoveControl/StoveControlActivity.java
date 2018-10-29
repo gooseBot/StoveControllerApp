@@ -5,16 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
@@ -34,56 +31,25 @@ public class StoveControlActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        togglebutton = (ToggleButton) findViewById(R.id.toggleButton1);
-        togglebutton.setChecked(getStoveState());
+        togglebutton = findViewById(R.id.toggleButton1);
         Log.i("[MESSAGE]", "OnStart");
+        new getStoveState().execute();
     }
 
-
-	// This method is called at button click because we assigned the name to the
-	// "On Click property" of the button
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
 		case R.id.toggleButton1:
 			// Perform action on clicks
 			if (togglebutton.isChecked()) {
-				postData(true);
+                new postData().execute(true);
 			} else {
-				postData(false);
+                new postData().execute(false);
 			}
-		}
-	}
-
-	private void postData(boolean stoveState) {
-		// Create a new HttpClient and Post Header
-		InputStream content = null;
-		try {
-            HttpParams httpParameters = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpParameters, 6000);
-            HttpConnectionParams.setSoTimeout(httpParameters, 6000);
-            HttpClient httpclient = new DefaultHttpClient(httpParameters);
-
-			if (stoveState == true) {
-				HttpResponse response = httpclient
-						.execute(new HttpGet(
-                                urlBase+"/stove/1"));
-				content = response.getEntity().getContent();
-			} else {
-				HttpResponse response = httpclient
-						.execute(new HttpGet(
-                                urlBase+"/stove/0"));
-				content = response.getEntity().getContent();
-			}
-			String responseText = inputStreamToString(content).toString();
-			displayResponse(responseText);
-		} catch (Exception e) {
-            displayResponse("Network Timeout");
-            togglebutton.setChecked(false);
 		}
 	}
 
 	private StringBuilder inputStreamToString(InputStream is) {
-		String line = "";
+		String line;
 		StringBuilder total = new StringBuilder();
 
 		// Wrap a BufferedReader around the InputStream
@@ -101,32 +67,73 @@ public class StoveControlActivity extends Activity {
 		return total;
 	}
 
-	private boolean getStoveState() {
-		InputStream content = null;
-		boolean stoveOn = false;
-
-		try {
-            HttpParams httpParameters = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpParameters, 6000);
-            HttpConnectionParams.setSoTimeout(httpParameters, 6000);
-
-			HttpClient httpclient = new DefaultHttpClient(httpParameters);
-			HttpResponse response = httpclient.execute(new HttpGet(urlBase+"/stove/status"));
-			content = response.getEntity().getContent();
-			String responseText = inputStreamToString(content).toString();
-			displayResponse(responseText);
-			stoveOn = responseText.contains("on");
-
-		} catch (Exception e) {
-            displayResponse("Network Timeout");
-            stoveOn=false;
-        }
-		return stoveOn;
-	}
-
 	private void displayResponse(String htmlString) {
-		WebView web = (WebView) findViewById(R.id.webView1);
+		WebView web = findViewById(R.id.webView1);
 		web.loadData(htmlString, "text/html", null);
 	}
 
+    private class getStoveState extends AsyncTask<String, Void, String> {
+
+        OkHttpClient client = new OkHttpClient();
+
+        // This is run in a background thread
+        protected String doInBackground(String... params) {
+            // get the string from params, which is an array
+            Boolean stoveOn = false;
+            String responseText;
+
+            Request.Builder builder = new Request.Builder();
+            builder.url(urlBase+"/stove/status");
+            Request request = builder.build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                responseText = response.body().string();
+            } catch (Exception e) {
+                responseText = e.toString();
+            }
+            return responseText;
+        }
+
+        // This runs in UI when background thread finishes
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            displayResponse(result);
+            togglebutton.setChecked(result.contains("on"));
+        }
+    }
+
+    private class postData extends AsyncTask<Boolean, Void, String> {
+
+        OkHttpClient client = new OkHttpClient();
+
+        // This is run in a background thread
+        protected String doInBackground(Boolean... params) {
+            // Create a new HttpClient and Post Header
+            String responseText;
+            Boolean setState = params[0];
+            Request.Builder builder = new Request.Builder();
+            if (setState) {
+                builder.url(urlBase+"/stove/1");
+            } else {
+                builder.url(urlBase+"/stove/0");
+            }
+            Request request = builder.build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                responseText = response.body().string();
+            } catch (Exception e) {
+                responseText = e.toString();
+            }
+            return responseText;
+       }
+
+        // This runs in UI when background thread finishes
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            displayResponse(result);
+            togglebutton.setChecked(result.contains("on"));
+        }
+    }
 }
