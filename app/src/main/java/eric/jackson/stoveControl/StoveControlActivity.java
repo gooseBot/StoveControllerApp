@@ -10,24 +10,54 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ToggleButton;
 
+import androidx.preference.PreferenceManager;
+
 public class StoveControlActivity extends Activity {
 	/** Called when the activity is first created. */
     ToggleButton togglebutton;
-    String urlBase ="http://graycat.ddns.net:8080/";
+    //String urlBase ="http://crazycat.ddns.net:8080/";
+    String urlBase ="";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        urlBase = sharedPref.getString(settingsActivity.KEY_PREF_DNS,
+                "crazycat.ddns.net");
+        urlBase="http://"+urlBase+":8080/";
+        setContentView(R.layout.main);
 	}
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, settingsActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                // Do nothing
+        }
+        return super.onOptionsItemSelected(item);
+    }
     @Override
     public void onStart() {
         super.onStart();

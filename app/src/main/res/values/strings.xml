@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, StoveControlActivity!</string>
     <string name="app_name">StoveControl</string>
     <string name="stoveButton">Stove</string>
     <string name="myClickHandler">myClickHandler</string>
-
+    <string name="title_Stove_DNS">Stove DNS</string>
+    <string name="summary_Stove_DNS">Domain name for Stove Controller</string>
+    <string name="default_Stove_DNS">crazycat.ddns.net</string>
+    <string name="key_stove_DNS">key_stove_DNS</string>
+    <string name="settings">Settings</string>
 </resources>

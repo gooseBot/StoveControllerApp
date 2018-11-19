@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+<EditTextPreference
+    android:defaultValue="@string/default_Stove_DNS"
+    android:key="@string/key_stove_DNS"
+    android:summary="@string/summary_Stove_DNS"
+    android:title="@string/title_Stove_DNS" />
+
+</androidx.preference.PreferenceScreen>
